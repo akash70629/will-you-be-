@@ -2,10 +2,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const btn = document.getElementById('runaway-btn');
     const yesBtn = document.getElementById('yes-btn');
 
-    if (!btn) return; // Exit if button isn't found to prevent errors
+    if (!btn) return;
+
+    // --- NEW: Store the original position of the No button ---
+    const originalNoPos = {
+        left: btn.style.left,
+        top: btn.style.top,
+        position: btn.style.position
+    };
 
     // --- 1. RUNAWAY LOGIC ---
-    btn.style.position = 'absolute'; // Critical for movement
+    btn.style.position = 'absolute';
     btn.style.margin = '0';
 
     let moving = false;
@@ -16,8 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const w = btn.offsetWidth;
         const h = btn.offsetHeight;
-        
-        // Lock dimensions so it doesn't jump
         btn.style.width = `${w}px`;
         btn.style.height = `${h}px`;
 
@@ -50,23 +55,13 @@ document.addEventListener('DOMContentLoaded', () => {
             redirectBtn = document.createElement('button');
             redirectBtn.id = 'redirect-btn';
             redirectBtn.textContent = "Click for a surprise! ❤️";
-            
-            // Initial Styles
             redirectBtn.style.cssText = `
-                position: absolute;
-                z-index: 1000;
-                padding: 15px 25px;
-                background-color: #ff4d6d;
-                color: white;
-                border: none;
-                border-radius: 25px;
-                cursor: pointer;
-                font-weight: bold;
-                display: none;
-                transition: all 0.3s ease;
+                position: absolute; z-index: 1000; padding: 15px 25px;
+                background-color: #ff4d6d; color: white; border: none;
+                border-radius: 25px; cursor: pointer; font-weight: bold;
+                display: none; transition: all 0.3s ease;
             `;
 
-            // NEW: Hover Effects
             redirectBtn.addEventListener('mouseenter', () => {
                 redirectBtn.style.backgroundColor = '#ff0033';
                 redirectBtn.style.transform = 'scale(1.1)';
@@ -80,7 +75,6 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.appendChild(redirectBtn);
         }
 
-        // Save original styles
         if (!yesBtn.dataset.original) {
             yesBtn.dataset.original = JSON.stringify({
                 backgroundImage: yesBtn.style.backgroundImage,
@@ -92,7 +86,12 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // Apply Happy State
+        // --- THE "HAPPY" TRANSITION ---
+        
+        // 1. Hide the "No" button immediately
+        btn.style.display = 'none'; 
+
+        // 2. Change "Yes" button appearance
         yesBtn.style.backgroundImage = "url(joy.gif)";
         yesBtn.style.backgroundSize = "cover";
         yesBtn.style.padding = "83px 122px";
@@ -100,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
         yesBtn.style.left = "14%";
         yesBtn.textContent = "";
 
-        // Show Surprise Button
+        // 3. Show the Redirect Surprise button
         redirectBtn.style.display = "block";
         redirectBtn.style.top = "65%"; 
         redirectBtn.style.left = "20%";
@@ -110,6 +109,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const original = JSON.parse(yesBtn.dataset.original);
             Object.assign(yesBtn.style, original);
             yesBtn.textContent = original.textContent;
+
+            // --- NEW: Reset "No" button position and show it ---
+            btn.style.left = originalNoPos.left;
+            btn.style.top = originalNoPos.top;
+            btn.style.position = originalNoPos.position;
+            btn.style.display = 'block'; 
+            
             redirectBtn.style.display = "none";
         }, 10000);
     }
